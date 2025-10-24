@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Administración - Archivo de Guías</title>
+    <link rel="stylesheet" href="/css/styles.css">
+    <link rel="stylesheet" href="/css/admin.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="nav-brand">
+                <i class="fas fa-cog"></i>
+                <h1>Panel de Administración</h1>
+            </div>
+            <nav class="nav-menu">
+                <a href="/" class="btn btn-outline">
+                    <i class="fas fa-home"></i> Volver al Inicio
+                </a>
+                <div id="user-menu" class="user-menu" style="display: none;">
+                    <span id="username-display"></span>
+                    <button id="logout-btn" class="btn btn-outline">
+                        <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+                    </button>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="admin-main">
+        <div class="container">
+            <!-- Stats Dashboard -->
+            <section class="admin-stats">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-file-excel"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3 id="total-guides-stat">0</h3>
+                            <p>Total de Guías</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-comments"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3 id="total-comments-stat">0</h3>
+                            <p>Total de Comentarios</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3 id="total-users-stat">0</h3>
+                            <p>Usuarios Registrados</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3>100%</h3>
+                            <p>Funcional</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Action Tabs -->
+            <section class="admin-tabs">
+                <div class="tab-buttons">
+                    <button class="tab-btn active" data-tab="upload">
+                        <i class="fas fa-upload"></i> Subir Guía
+                    </button>
+                    <button class="tab-btn" data-tab="manage">
+                        <i class="fas fa-list"></i> Gestionar Guías
+                    </button>
+                    <button class="tab-btn" data-tab="analytics">
+                        <i class="fas fa-chart-bar"></i> Analíticas
+                    </button>
+                </div>
+
+                <!-- Upload Tab -->
+                <div class="tab-content active" id="upload-tab">
+                    <div class="upload-section">
+                        <h3>Subir Nueva Guía</h3>
+                        <form id="upload-form" class="upload-form">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="guide-title">Título de la Guía *</label>
+                                    <input type="text" id="guide-title" name="title" required 
+                                           placeholder="Ej: Ejercicios de Matemáticas Resueltos">
+                                </div>
+                                <div class="form-group">
+                                    <label for="guide-number">Número de Guía *</label>
+                                    <select id="guide-number" name="guideNumber" required>
+                                        <option value="">Seleccionar guía</option>
+                                        <option value="1">Guía 1</option>
+                                        <option value="2">Guía 2</option>
+                                        <option value="3">Guía 3</option>
+                                        <option value="4">Guía 4</option>
+                                        <option value="5">Guía 5</option>
+                                        <option value="6">Guía 6</option>
+                                        <option value="7">Guía 7</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="guide-description">Descripción (Opcional)</label>
+                                <textarea id="guide-description" name="description" rows="3" 
+                                          placeholder="Describe brevemente el contenido de la guía de estudio..."></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="guide-file">Archivo Excel *</label>
+                                <div class="file-upload-area" id="file-upload-area">
+                                    <input type="file" id="guide-file" name="file" accept=".xlsx,.xls" required>
+                                    <div class="file-upload-content">
+                                        <i class="fas fa-cloud-upload-alt"></i>
+                                        <p>Arrastra y suelta el archivo Excel aquí o <span>haz clic para seleccionar</span></p>
+                                        <small>Solo archivos .xlsx y .xls (máximo 10MB)</small>
+                                    </div>
+                                </div>
+                                <div id="file-info" class="file-info" style="display: none;"></div>
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-upload">
+                                <i class="fas fa-upload"></i> Subir Guía
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Manage Tab -->
+                <div class="tab-content" id="manage-tab">
+                    <div class="manage-section">
+                        <div class="section-header">
+                            <h3>Gestionar Guías</h3>
+                            <button id="refresh-guides" class="btn btn-outline">
+                                <i class="fas fa-sync-alt"></i> Actualizar
+                            </button>
+                        </div>
+                        <div class="guides-table-container">
+                            <table class="guides-table">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Título</th>
+                                        <th>Guía</th>
+                                        <th>Tamaño</th>
+                                        <th>Fecha</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="guides-table-body">
+                                    <!-- Guides will be loaded here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Analytics Tab -->
+                <div class="tab-content" id="analytics-tab">
+                    <div class="analytics-section">
+                        <h3>Analíticas del Sistema</h3>
+                        <div class="analytics-grid">
+                            <div class="analytics-card">
+                                <h4>Guías por Capítulo</h4>
+                                <div id="chapter-stats" class="chapter-stats">
+                                    <!-- Chapter stats will be loaded here -->
+                                </div>
+                            </div>
+                            <div class="analytics-card">
+                                <h4>Actividad Reciente</h4>
+                                <div id="recent-activity" class="activity-list">
+                                    <p class="text-center text-light">Cargando actividad reciente...</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Delete Confirmation Modal -->
+    <div id="delete-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4>Confirmar Eliminación</h4>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>¿Estás seguro de que quieres eliminar esta guía?</p>
+                <p class="text-error"><strong>Esta acción no se puede deshacer.</strong></p>
+                <div id="guide-to-delete"></div>
+            </div>
+            <div class="modal-footer">
+                <button id="confirm-delete" class="btn btn-danger">
+                    <i class="fas fa-trash"></i> Eliminar
+                </button>
+                <button class="btn btn-outline close-modal">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h5>Integrantes</h5>
+                    <p>Jennifer Gómez</p>
+                    <p>David Salinas</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 Jennifer Gómez & David Salinas. Todos los derechos reservados.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="/js/admin.js"></script>
+</body>
+</html>
