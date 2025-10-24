@@ -33,16 +33,18 @@ app.use(cors());
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
-// Configuración de sesiones
-app.use(session({
-  secret: process.env.SESSION_SECRET || 'tu-secreto-super-seguro-aqui',
-  resave: false,
-  saveUninitialized: false,
-  cookie: { 
-    secure: false, // En producción debería ser true con HTTPS
-    maxAge: 24 * 60 * 60 * 1000 // 24 horas
-  }
-}));
+// Configuración de sesiones (solo para desarrollo local)
+if (process.env.NODE_ENV !== 'production') {
+  app.use(session({
+    secret: process.env.SESSION_SECRET || 'tu-secreto-super-seguro-aqui',
+    resave: false,
+    saveUninitialized: false,
+    cookie: { 
+      secure: false,
+      maxAge: 24 * 60 * 60 * 1000 // 24 horas
+    }
+  }));
+}
 
 // Archivos estáticos
 app.use(express.static(path.join(__dirname, 'public')));
@@ -117,4 +119,6 @@ if (process.env.NODE_ENV !== 'production') {
   });
 }
 
+// Export para Vercel serverless
 module.exports = app;
+module.exports.default = app;
