@@ -14,13 +14,6 @@ const adminRoutes = require('./routes/admin');
 const commentRoutes = require('./routes/comments');
 
 const app = express();
-const server = http.createServer(app);
-const io = socketIo(server, {
-  cors: {
-    origin: "*",
-    methods: ["GET", "POST"]
-  }
-});
 
 // Configuración de seguridad
 app.use(helmet({
@@ -42,7 +35,7 @@ app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
 // Configuración de sesiones
 app.use(session({
-  secret: 'tu-secreto-super-seguro-aqui',
+  secret: process.env.SESSION_SECRET || 'tu-secreto-super-seguro-aqui',
   resave: false,
   saveUninitialized: false,
   cookie: { 
@@ -67,7 +60,7 @@ app.get('/', (req, res) => {
 });
 
 app.get('/login', (req, res) => {
-  res.sendFile(path.join(__dirname, 'views', 'login.html'));
+  res.sendFile(path.join(__dirname, 'views', 'index.html'));
 });
 
 app.get('/admin', (req, res) => {
@@ -76,23 +69,6 @@ app.get('/admin', (req, res) => {
 
 app.get('/guide/:id', (req, res) => {
   res.sendFile(path.join(__dirname, 'views', 'guide.html'));
-});
-
-// Socket.IO para comentarios en tiempo real
-io.on('connection', (socket) => {
-  console.log('Usuario conectado:', socket.id);
-
-  socket.on('join-guide', (guideId) => {
-    socket.join(`guide-${guideId}`);
-  });
-
-  socket.on('new-comment', (data) => {
-    io.to(`guide-${data.guideId}`).emit('comment-added', data);
-  });
-
-  socket.on('disconnect', () => {
-    console.log('Usuario desconectado:', socket.id);
-  });
 });
 
 // Manejo de errores
@@ -106,11 +82,39 @@ app.use('*', (req, res) => {
   res.status(404).json({ error: 'Ruta no encontrada' });
 });
 
-const PORT = process.env.PORT || 3000;
+// Para desarrollo local
+if (process.env.NODE_ENV !== 'production') {
+  const server = http.createServer(app);
+  const io = socketIo(server, {
+    cors: {
+      origin: "*",
+      methods: ["GET", "POST"]
+    }
+  });
 
-server.listen(PORT, () => {
-  console.log(`🚀 Servidor ejecutándose en http://localhost:${PORT}`);
-  console.log('📊 Plataforma de Guías de Estadística iniciada correctamente');
-});
+  // Socket.IO para comentarios en tiempo real
+  io.on('connection', (socket) => {
+    console.log('Usuario conectado:', socket.id);
 
-module.exports = { app, io };
+    socket.on('join-guide', (guideId) => {
+      socket.join(`guide-${guideId}`);
+    });
+
+    socket.on('new-comment', (data) => {
+      io.to(`guide-${data.guideId}`).emit('comment-added', data);
+    });
+
+    socket.on('disconnect', () => {
+      console.log('Usuario desconectado:', socket.id);
+    });
+  });
+
+  const PORT = process.env.PORT || 3000;
+
+  server.listen(PORT, () => {
+    console.log(`🚀 Servidor ejecutándose en http://localhost:${PORT}`);
+    console.log('📊 Plataforma de Archivo de Guías iniciada correctamente');
+  });
+}
+
+module.exports = app;
