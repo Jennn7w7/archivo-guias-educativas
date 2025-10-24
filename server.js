@@ -1,12 +1,6 @@
 const express = require('express');
 const path = require('path');
 const cors = require('cors');
-const helmet = require('helmet');
-const morgan = require('morgan');
-const rateLimit = require('express-rate-limit');
-const session = require('express-session');
-const http = require('http');
-const socketIo = require('socket.io');
 
 const authRoutes = require('./routes/auth');
 const guideRoutes = require('./routes/guides');
@@ -15,36 +9,10 @@ const commentRoutes = require('./routes/comments');
 
 const app = express();
 
-// Configuración de seguridad
-app.use(helmet({
-  contentSecurityPolicy: false // Desactivamos CSP para desarrollo
-}));
-
-// Rate limiting
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutos
-  max: 100 // límite de 100 requests por IP por ventana
-});
-app.use(limiter);
-
 // Middleware básico
-app.use(morgan('combined'));
 app.use(cors());
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
-
-// Configuración de sesiones (solo para desarrollo local)
-if (process.env.NODE_ENV !== 'production') {
-  app.use(session({
-    secret: process.env.SESSION_SECRET || 'tu-secreto-super-seguro-aqui',
-    resave: false,
-    saveUninitialized: false,
-    cookie: { 
-      secure: false,
-      maxAge: 24 * 60 * 60 * 1000 // 24 horas
-    }
-  }));
-}
 
 // Archivos estáticos
 app.use(express.static(path.join(__dirname, 'public')));
@@ -75,8 +43,8 @@ app.get('/guide/:id', (req, res) => {
 
 // Manejo de errores
 app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).json({ error: 'Algo salió mal en el servidor' });
+  console.error('Error:', err);
+  res.status(500).json({ error: 'Error interno del servidor' });
 });
 
 // Ruta 404
@@ -86,36 +54,9 @@ app.use('*', (req, res) => {
 
 // Para desarrollo local
 if (process.env.NODE_ENV !== 'production') {
-  const server = http.createServer(app);
-  const io = socketIo(server, {
-    cors: {
-      origin: "*",
-      methods: ["GET", "POST"]
-    }
-  });
-
-  // Socket.IO para comentarios en tiempo real
-  io.on('connection', (socket) => {
-    console.log('Usuario conectado:', socket.id);
-
-    socket.on('join-guide', (guideId) => {
-      socket.join(`guide-${guideId}`);
-    });
-
-    socket.on('new-comment', (data) => {
-      io.to(`guide-${data.guideId}`).emit('comment-added', data);
-    });
-
-    socket.on('disconnect', () => {
-      console.log('Usuario desconectado:', socket.id);
-    });
-  });
-
   const PORT = process.env.PORT || 3000;
-
-  server.listen(PORT, () => {
+  app.listen(PORT, () => {
     console.log(`🚀 Servidor ejecutándose en http://localhost:${PORT}`);
-    console.log('📊 Plataforma de Archivo de Guías iniciada correctamente');
   });
 }
 
